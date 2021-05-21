@@ -1,0 +1,32 @@
+#!/bin/bash
+
+current_status=`cat /sys/bus/platform/drivers/ideapad_acpi/VPC2004:00/conservation_mode`
+if [ "$current_status" = "1" ]; then
+  echo "Battery threshold is on at 60%."
+  read -n 1 -p "Turn it off? (y/n) " yn
+  echo ""
+  case $yn in
+    y|Y)
+      echo 0 | sudo tee /sys/bus/platform/drivers/ideapad_acpi/VPC2004:00/conservation_mode > /dev/null
+      echo "Charge threshold removed"
+      ;;
+    *)
+      echo "Okay, doing nothing..."
+      exit 0
+  esac
+elif [ "$current_status" = "0" ]; then
+  echo "Battery charge threshold is off"
+  read -n 1 -p "Turn it on? (y/n) " yn
+  echo ""
+  case $yn in
+    y|Y)
+      echo 1 | sudo tee /sys/bus/platform/drivers/ideapad_acpi/VPC2004:00/conservation_mode > /dev/null
+      echo "Charge threshold has been set at 60%"
+      ;;
+    *)
+      echo "Okay, doing nothing..."
+      exit 0
+  esac
+fi
+
+exit 0
